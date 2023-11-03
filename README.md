@@ -1,2 +1,2 @@
-# pokemon-red-runner
+# pokemon-gen-runner
 Reinforcement Learning for Pokemon Red Version
