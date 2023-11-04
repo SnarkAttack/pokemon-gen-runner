@@ -1,2 +1,4 @@
 env/
 rom/
+build/
+*.egg-info
