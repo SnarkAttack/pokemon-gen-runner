@@ -9,6 +9,13 @@ class PokemonGen1Env(Env):
         # Optional config arguments
         self.debug = config.get("debug", False)
 
+
+
+        # Gymnasium Env requirements
+
+        # 8 options: left, right, up, down, A, B, Start, Select
+        self.action_space = spaces.Discrete(8)
+
     def step(self, action):
         pass
 

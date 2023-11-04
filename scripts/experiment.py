@@ -4,12 +4,12 @@ if __name__ == "__main__":
     
     pyboy = PyBoy('rom/PokemonRed.gb', game_wrapper=True)
 
-    pyboy.set_emulation_speed(1)
+    pyboy.set_emulation_speed(0)
 
     poke_red = pyboy.game_wrapper()
     poke_red.start_game()
 
-    print(poke_red.get_player_monster(0))
+    print(type(poke_red))
 
     with open('game_states/base.state', 'rb') as f:
         pyboy.load_state(f)
