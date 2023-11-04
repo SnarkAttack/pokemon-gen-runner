@@ -3,6 +3,10 @@ from gymnasium import Env, spaces
 class PokemonGen1Env(Env):
 
     def __init__(self, config={}):
+        # Required config arguments
+        self.rom_path = config['rom_path']
+
+        # Optional config arguments
         self.debug = config.get("debug", False)
 
     def step(self, action):
@@ -16,4 +20,6 @@ class PokemonGen1Env(Env):
 
     def close(self):
         pass
+
+
 
