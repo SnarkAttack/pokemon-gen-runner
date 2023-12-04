@@ -1,4 +1,5 @@
 env/
 rom/
 build/
+**/__pycache__/
 *.egg-info
