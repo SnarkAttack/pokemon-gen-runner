@@ -1,0 +1,1 @@
+from .gen_1_env import PokemonGen1Env
