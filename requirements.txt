@@ -1,0 +1,5 @@
+numpy
+pytorch
+gymnasium
+tensorboard
+stable-baselines3
