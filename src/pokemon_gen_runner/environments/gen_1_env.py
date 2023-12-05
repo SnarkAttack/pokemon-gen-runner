@@ -76,6 +76,12 @@ class PokemonGen1Env(gym.Env):
         return {'map': new_map}, reward, False, terminated, {}
 
     def reset(self, seed=None):
+
+        total_reward = self._reward_tracker._total_reward
+
+        if total_reward > self.best_reward:
+            self.best_reward = total_reward
+
         with open(self._init_state, 'rb') as f:
             self._pyboy.load_state(f)
 
