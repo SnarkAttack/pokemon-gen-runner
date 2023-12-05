@@ -67,17 +67,19 @@ class PokemonGen1Env(gym.Env):
 
         new_map = self._poke_red._get_screen_background_tilemap()[::2, ::2]
 
-        reward = self._reward_tracker.update_reward(self._poke_red)
+        reward = self.reward_tracker.update_reward(self._poke_red)
 
-        self._steps += 1
+        self.steps += 1
 
-        terminated = self._check_if_finished()
+        terminated = self.check_if_finished()
 
-        return {'map': new_map}, reward, False, terminated, {}
+        return {'map': new_map}, reward, False, terminated, {'reward_tracker': self.reward_tracker}
 
     def reset(self, seed=None):
 
-        total_reward = self._reward_tracker._total_reward
+        prev_reward_tracker = self.reward_tracker
+
+        total_reward = self.reward_tracker._total_reward
 
         if total_reward > self.best_reward:
             self.best_reward = total_reward
@@ -86,12 +88,11 @@ class PokemonGen1Env(gym.Env):
             self._pyboy.load_state(f)
 
         self._steps = 0
-        self._max_steps = 100
         self._reward_tracker = self._get_new_reward_tracker()
 
         start_map = self._poke_red._get_screen_background_tilemap()[::2, ::2]
 
-        return {'map': start_map}, {}
+        return {'map': start_map}, {'reward_tracker': prev_reward_tracker}
 
     def render(self):
         return None
