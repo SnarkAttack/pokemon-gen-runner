@@ -4,7 +4,7 @@ from gymnasium.wrappers import FlattenObservation
 import pyboy.plugins.game_wrapper_pokemon_gen1 as poke_gen_1
 from pyboy import PyBoy, WindowEvent
 from ..action import ALL_VALID_ACTIONS
-from ..reward_trackers import TouchGrassRewardTracker
+from ..reward_trackers import TouchGrassRewardTracker, BattleRewardTracker
 
 class PokemonGen1Env(gym.Env):
     def __init__(self, config={}):
@@ -51,6 +51,8 @@ class PokemonGen1Env(gym.Env):
     def _get_new_reward_tracker(self):
         if self._reward_tracker_type == 'touch_grass':
             return TouchGrassRewardTracker(self._poke_red)
+        elif self._reward_tracker_type == 'battle':
+            return BattleRewardTracker(self._poke_red)
         else:
             raise ValueError(f"{self._reward_tracker_type} is not al valid rewatd tracker id")
 
