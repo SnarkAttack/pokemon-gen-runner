@@ -38,6 +38,7 @@ class PokemonGen1Env(gym.Env):
 
         self._steps = 0
         self._reward_tracker = FindGrassRewardTracker(self._poke_red)
+        self.best_reward = 0
 
         with open(self._init_state, 'rb') as f:
             self._pyboy.load_state(f)
@@ -67,11 +68,16 @@ class PokemonGen1Env(gym.Env):
         return {'map': new_map}, reward, False, terminated, {}
 
     def reset(self, seed=None):
+
+        total_reward = self._reward_tracker._total_reward
+
+        if total_reward > self.best_reward:
+            self.best_reward = total_reward
+
         with open(self._init_state, 'rb') as f:
             self._pyboy.load_state(f)
 
         self._steps = 0
-        self._max_steps = 100
         self._reward_tracker = FindGrassRewardTracker(self._poke_red)
 
         start_map = self._poke_red._get_screen_background_tilemap()[::2, ::2]
