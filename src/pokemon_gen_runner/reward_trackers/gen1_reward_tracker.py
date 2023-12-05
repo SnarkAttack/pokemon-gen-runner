@@ -3,7 +3,7 @@
 class Gen1RewardTracker():
 
     def __init__(self):
-        pass
+        self._total_reward = 0
 
     def initialize(self, poke_red):
         raise NotImplementedError(f"initialize not implemented for class {self.__class__.__name__}")
@@ -17,7 +17,6 @@ class FindGrassRewardTracker(Gen1RewardTracker):
     def __init__(self, poke_red):
         super().__init__()
         self._location = poke_red.get_player_location()
-        self._total_reward = 0
 
     def update_reward(self, poke_red):
         map = poke_red._get_screen_background_tilemap()[::2, ::2]
