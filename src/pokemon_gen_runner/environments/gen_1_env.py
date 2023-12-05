@@ -4,7 +4,7 @@ from gymnasium.wrappers import FlattenObservation
 import pyboy.plugins.game_wrapper_pokemon_gen1 as poke_gen_1
 from pyboy import PyBoy, WindowEvent
 from ..action import ALL_VALID_ACTIONS
-from ..reward_trackers.gen1_reward_tracker import FindGrassRewardTracker
+from ..reward_trackers import TouchGrassRewardTracker
 
 class PokemonGen1Env(gym.Env):
     def __init__(self, config={}):
@@ -12,6 +12,7 @@ class PokemonGen1Env(gym.Env):
         self._rom_path = config['rom_path']
         self._init_state = config['init_state']
         self._max_steps = config['max_steps']
+        self._reward_tracker_type = config['reward_tracker_type']
 
         # Optional config arguments
         self._debug = config.get("debug", False)
@@ -37,7 +38,7 @@ class PokemonGen1Env(gym.Env):
         self._poke_red.start_game()
 
         self._steps = 0
-        self._reward_tracker = FindGrassRewardTracker(self._poke_red)
+        self._reward_tracker = self._get_new_reward_tracker()
 
         with open(self._init_state, 'rb') as f:
             self._pyboy.load_state(f)
@@ -46,6 +47,12 @@ class PokemonGen1Env(gym.Env):
             self._pyboy.set_emulation_speed(4)
 
         self.reset()
+
+    def _get_new_reward_tracker(self):
+        if self._reward_tracker_type == 'touch_grass':
+            return TouchGrassRewardTracker(self._poke_red)
+        else:
+            raise ValueError(f"{self._reward_tracker_type} is not al valid rewatd tracker id")
 
     def _check_if_finished(self):
         return self._steps >= self._max_steps
@@ -72,7 +79,7 @@ class PokemonGen1Env(gym.Env):
 
         self._steps = 0
         self._max_steps = 100
-        self._reward_tracker = FindGrassRewardTracker(self._poke_red)
+        self._reward_tracker = self._get_new_reward_tracker()
 
         start_map = self._poke_red._get_screen_background_tilemap()[::2, ::2]
 
