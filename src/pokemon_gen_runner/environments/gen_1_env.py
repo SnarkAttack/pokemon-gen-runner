@@ -4,7 +4,7 @@ from gymnasium.wrappers import FlattenObservation
 import pyboy.plugins.game_wrapper_pokemon_gen1 as poke_gen_1
 from pyboy import PyBoy, WindowEvent
 from ..action import ALL_VALID_ACTIONS
-from ..reward_trackers import TouchGrassRewardTracker, BattleRewardTracker
+from ..reward_trackers import TouchGrassRewardTracker, BattleRewardTracker, ExplorerRewardTracker
 
 class PokemonGen1Env(gym.Env):
     def __init__(self, config={}):
@@ -53,11 +53,16 @@ class PokemonGen1Env(gym.Env):
             return TouchGrassRewardTracker(self._poke_red)
         elif self._reward_tracker_type == 'battle':
             return BattleRewardTracker(self._poke_red)
+        elif self._reward_tracker_type == 'explore':
+            return ExplorerRewardTracker(self._poke_red)
         else:
             raise ValueError(f"{self._reward_tracker_type} is not al valid rewatd tracker id")
 
     def _check_if_finished(self):
         return self._steps >= self._max_steps
+    
+    def get_total_reward(self):
+        return self._reward_tracker.total_reward
 
     def step(self, action):
 
