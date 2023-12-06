@@ -88,8 +88,8 @@ def train(args):
     session_id = f"{reward_tracker_type}_{session_id}"
 
     tensorboard_path = Path(f"tensorboard")
-    session_path = Path(f"output/{session_dir}")
-    model_path = Path(f"output/{session_dir}/model.zip")
+    session_path = Path(f"output/{session_id}")
+    model_path = Path(f"output/{session_id}/model.zip")
 
     if prev_save is None:
 
