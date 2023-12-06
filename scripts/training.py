@@ -49,15 +49,22 @@ class TensorboardCallback(BaseCallback):
 
 def train(max_steps, num_epochs, verbose=False, headless=False, prev_save=None):
 
+    reward_tracker_type = 'explore'
+
     env_config = {
         'rom_path': 'rom/PokemonRed.gb',
         'init_state': 'game_states/base.state',
-        'reward_tracker_type': 'touch_grass',
+        'reward_tracker_type': reward_tracker_type,
         'max_steps': max_steps,
         'headless': headless
     }
 
-    num_cpus = multiprocessing.cpu_count()
+    if headless:
+        num_cpus = multiprocessing.cpu_count()
+    else:
+        num_cpus = 1
+
+    # num_cpus = 1
 
     if num_cpus == 1:
         env = PokemonGen1Env(env_config)
@@ -65,9 +72,11 @@ def train(max_steps, num_epochs, verbose=False, headless=False, prev_save=None):
         env = SubprocVecEnv([make_env(i, env_config) for i in range(num_cpus)])
 
     session_id = str(uuid.uuid4())[:8]
+    session_dir = f"{reward_tracker_type}_{session_id}"
+
     tensorboard_path = Path(f"tensorboard")
-    session_path = Path(f"output/{session_id}")
-    model_path = Path(f"output/{session_id}/model.zip")
+    session_path = Path(f"output/{session_dir}")
+    model_path = Path(f"output/{session_dir}/model.zip")
 
     if prev_save is None:
 
