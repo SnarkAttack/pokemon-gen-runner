@@ -62,6 +62,7 @@ def train(max_steps, num_epochs, verbose=False, headless=False):
     env_config = {
         'rom_path': 'rom/PokemonRed.gb',
         'init_state': 'game_states/base.state',
+        'reward_tracker_type': 'touch_grass',
         'max_steps': max_steps,
         'headless': headless
     }
