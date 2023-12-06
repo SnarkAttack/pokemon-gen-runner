@@ -1,17 +1,9 @@
 import numpy as np
 from skimage.transform import resize
 from gymnasium.spaces import Box, Dict
+from .observation_manager import ObservationManager
 
-class ObservationManager():
-
-    def __init__(self):
-        pass
-
-    @property
-    def current_observation(self):
-        return None
-
-class ScreenOnlyObservationManager(ObservationManager):
+class SingleScreenObservationManager(ObservationManager):
 
     def __init__(self):
         super().__init__()
@@ -19,10 +11,6 @@ class ScreenOnlyObservationManager(ObservationManager):
         self._observation_space = Dict({
             'screen': Box(low=0, high=255, shape=self._output_screen_shape, dtype=np.uint8)
         })
-
-    @property
-    def observation_space(self):
-        return self._observation_space
 
     def current_observation(self, poke_gen1):
 

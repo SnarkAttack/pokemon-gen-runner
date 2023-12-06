@@ -5,7 +5,7 @@ from pyboy import PyBoy
 from gymnasium.spaces import Box, Dict
 from ..action import ALL_VALID_ACTIONS
 from ..reward_trackers import TouchGrassRewardTracker, BattleRewardTracker, ExplorerRewardTracker
-from ..observation_manager import ScreenOnlyObservationManager
+from ..observation_managers import SingleScreenObservationManager, StackedScreenObservationManager
 
 class PokemonGen1Env(gym.Env):
     def __init__(self, config={}):
@@ -30,7 +30,7 @@ class PokemonGen1Env(gym.Env):
         self._poke_red = self._pyboy.game_wrapper()
         self._poke_red.start_game()
 
-        self._observation_manager = ScreenOnlyObservationManager()
+        self._observation_manager = StackedScreenObservationManager()
 
         self._steps = 0
         self._reward_tracker = self._get_new_reward_tracker()
