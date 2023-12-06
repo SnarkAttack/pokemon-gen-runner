@@ -9,3 +9,8 @@ class Gen1RewardTracker():
 
     def get_reward(self, poke_gen1):
         raise NotImplementedError(f"update_reward not implemented for class {self.__class__.__name__}")
+    
+    def report_results(self):
+        return {
+            "total_reward": self._total_reward
+        }

@@ -2,7 +2,7 @@ from .gen1_reward_tracker import Gen1RewardTracker
 
 class BattleRewardTracker(Gen1RewardTracker):
 
-    def __init__(self, poke_red):
+    def __init__(self):
         super().__init__()
 
     def get_reward(self, poke_red):
