@@ -77,11 +77,11 @@ class PokemonGen1Env(gym.Env):
 
         observation = self._observation_manager.current_observation(self._poke_red)
 
-        return observation, reward, False, terminated, {'reward_tracker': self._reward_tracker}
+        return observation, reward, False, terminated, {}
 
     def reset(self, seed=None):
 
-        prev_reward_tracker = self._reward_tracker
+        self.run_results = self._reward_tracker.report_results()
 
         with open(self._init_state, 'rb') as f:
             self._pyboy.load_state(f)
@@ -91,7 +91,7 @@ class PokemonGen1Env(gym.Env):
         
         observation = self._observation_manager.current_observation(self._poke_red)
 
-        return observation, {'reward_tracker': prev_reward_tracker}
+        return observation, {}
 
     def render(self):
         game_pixels_render = self.screen.screen_ndarray() # (144, 160, 3)

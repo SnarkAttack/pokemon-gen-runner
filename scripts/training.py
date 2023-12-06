@@ -40,11 +40,15 @@ class TensorboardCallback(BaseCallback):
 
     def _on_step(self):
         if self.locals["dones"][0]:
-            reward_trackers = [self.training_env.reset_infos[i]['reward_tracker'] for i in range(self.model.n_envs)]
+            result_data = self.training_env.get_attr("run_results")
+            avg_results = {}
+            for k in result_data[0].keys():
+                for result_dict in result_data:
+                    avg_results[k] = avg_results.get(k, 0) + result_dict[k]
+            for k, v in avg_results.items():
+                avg_results[k] = v/len(result_data)
+                self.logger.record(f"env_stats/avg_{k}", avg_results[k])
             # self.logger.record(f"env_stats/avg_reward", avg_reward)
-            rewards = [r._total_reward for r in reward_trackers]
-            avg_reward = sum(rewards) / len(rewards)
-            self.logger.record(f"env_stats/avg_reward", avg_reward)
         return True
 
 def train(args):
