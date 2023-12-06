@@ -47,17 +47,7 @@ class TensorboardCallback(BaseCallback):
             self.logger.record(f"env_stats/avg_reward", avg_reward)
         return True
 
-def train(max_steps, num_epochs, verbose=False, headless=False):
-
-    session_id = str(uuid.uuid4())[:8]
-    session_path = Path(f"output/{session_id}")
-    tensorboard_path = Path(f"tensorboard")
-    model_path = Path(f"models/{session_id}.zip")
-
-    checkpoint_callback = CheckpointCallback(save_freq=max_steps, save_path=session_path,
-                                     name_prefix='pg1')
-    
-    tensorboard_callback = TensorboardCallback()
+def train(max_steps, num_epochs, verbose=False, headless=False, prev_save=None):
 
     env_config = {
         'rom_path': 'rom/PokemonRed.gb',
@@ -74,17 +64,15 @@ def train(max_steps, num_epochs, verbose=False, headless=False):
     else:
         env = SubprocVecEnv([make_env(i, env_config) for i in range(num_cpus)])
 
-    file_name = "models/"
+    session_id = str(uuid.uuid4())[:8]
+    tensorboard_path = Path(f"tensorboard")
+    session_path = Path(f"output/{session_id}")
+    model_path = Path(f"output/{session_id}/model.zip")
 
-    if os.path.exists(file_name + '.zip'):
-        model = PPO.load(file_name, env=env)
-        model.n_steps = max_steps
-        model.n_envs = num_cpus
-        model.n_epochs = num_epochs
-        model.rollout_buffer.buffer_size = max_steps
-        model.rollout_buffer.n_envs = num_cpus
-        model.rollout_buffer.reset()
-    else:
+    if prev_save is None:
+
+        reset_num_timesteps = True
+
         model = PPO('MultiInputPolicy',
                     env,
                     n_steps=max_steps,
@@ -94,11 +82,31 @@ def train(max_steps, num_epochs, verbose=False, headless=False):
                     verbose=verbose,
                     device=("cuda" if torch.cuda.is_available() else "cpu"),
                 )
+    else:
+        if os.path.exists(prev_save):
+            model = PPO.load(prev_save, env=env)
+            model.n_steps = max_steps
+            model.n_envs = num_cpus
+            model.n_epochs = num_epochs
+            model.rollout_buffer.buffer_size = max_steps
+            model.rollout_buffer.n_envs = num_cpus
+            model.rollout_buffer.reset()
+            model.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+            reset_num_timesteps = False
+        else:
+            raise ValueError(f"{prev_save} does not exist.")
+
+    checkpoint_callback = CheckpointCallback(save_freq=max_steps, save_path=session_path,
+                                        name_prefix='pg1')
+        
+    tensorboard_callback = TensorboardCallback()
 
     model.learn(total_timesteps=max_steps*num_cpus*num_epochs,
                 callback=[tensorboard_callback, checkpoint_callback],
                 tb_log_name=session_id,
-                progress_bar=True
+                progress_bar=True,
+                reset_num_timesteps=reset_num_timesteps
                )
     
     model.save(model_path)
@@ -112,7 +120,8 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--num_epochs', type=int)
     parser.add_argument('-v', '--verbose', default=False, action='store_true')
     parser.add_argument('--headless', default=False, action='store_true')
+    parser.add_argument('--prev-save')
 
     args = parser.parse_args()
 
-    train(args.max_steps, args.num_epochs, args.verbose, args.headless)
+    train(args.max_steps, args.num_epochs, args.verbose, args.headless, args.prev_save)
