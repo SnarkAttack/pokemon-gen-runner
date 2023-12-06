@@ -18,7 +18,7 @@ def evaluate():
     env = PokemonGen1Env(env_config)
     
     #env_checker.check_env(env)
-    file_name = 'output/explore_acde1c99/pg1_5000_steps.zip'
+    file_name = 'output/explore_0ad99758/pg1_71000_steps.zip'
     
     print('\nLoading checkpoint')
     model = PPO.load(file_name, env=env)
@@ -27,7 +27,6 @@ def evaluate():
     obs, info = env.reset()
     while True:
         action, _states = model.predict(obs, deterministic=False)
-        print(env.get_total_reward())
         obs, rewards, terminated, truncated, info = env.step(action)
         if truncated:
             break
