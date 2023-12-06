@@ -18,7 +18,7 @@ def evaluate():
     env = PokemonGen1Env(env_config)
     
     #env_checker.check_env(env)
-    file_name = 'output/explore_6c1d8b0f/pg1_47000_steps.zip'
+    file_name = 'output/explore_acde1c99/pg1_5000_steps.zip'
     
     print('\nLoading checkpoint')
     model = PPO.load(file_name, env=env)

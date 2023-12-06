@@ -47,7 +47,15 @@ class TensorboardCallback(BaseCallback):
             self.logger.record(f"env_stats/avg_reward", avg_reward)
         return True
 
-def train(max_steps, num_epochs, verbose=False, headless=False, prev_save=None):
+def train(args):
+
+    max_steps = args.max_steps
+    num_epochs = args.num_epochs
+    verbose = args.verbose
+    headless = args.headless
+    prev_save = args.prev_save
+    num_cpus = args.num_cpus
+
 
     reward_tracker_type = 'explore'
 
@@ -59,12 +67,13 @@ def train(max_steps, num_epochs, verbose=False, headless=False, prev_save=None):
         'headless': headless
     }
 
-    if headless:
-        num_cpus = multiprocessing.cpu_count()
+    if num_cpus is None:
+        if headless:
+            num_cpus = multiprocessing.cpu_count()
+        else:
+            num_cpus = 1
     else:
-        num_cpus = 1
-
-    # num_cpus = 1
+        num_cpus = min(multiprocessing.cpu_count(), num_cpus)
 
     if num_cpus == 1:
         env = PokemonGen1Env(env_config)
@@ -111,6 +120,8 @@ def train(max_steps, num_epochs, verbose=False, headless=False, prev_save=None):
         
     tensorboard_callback = TensorboardCallback()
 
+    print(f"Session dir is {session_dir}")
+
     model.learn(total_timesteps=max_steps*num_cpus*num_epochs,
                 callback=[tensorboard_callback, checkpoint_callback],
                 tb_log_name=session_id,
@@ -129,8 +140,9 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--num_epochs', type=int)
     parser.add_argument('-v', '--verbose', default=False, action='store_true')
     parser.add_argument('--headless', default=False, action='store_true')
+    parser.add_argument('--num-cpus', type=int)
     parser.add_argument('--prev-save')
 
     args = parser.parse_args()
 
-    train(args.max_steps, args.num_epochs, args.verbose, args.headless, args.prev_save)
+    train(args)

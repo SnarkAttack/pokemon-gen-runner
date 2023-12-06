@@ -9,14 +9,13 @@ if __name__ == "__main__":
     poke_red = pyboy.game_wrapper()
     poke_red.start_game()
 
-    print(type(poke_red))
-
     with open('game_states/base.state', 'rb') as f:
         pyboy.load_state(f)
 
-    while not pyboy.tick():
-        pass
-    pyboy.stop()
+    ticks = 100
 
-    # with open('game_states/base.state', 'wb') as f:
-    #     pyboy.save_state(f)
+    while not pyboy.tick():
+        print(poke_red.get_player_location())
+        for i in range(ticks-1):
+            pyboy.tick()
+    pyboy.stop()
