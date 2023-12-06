@@ -1,5 +1,3 @@
-
-
 class Gen1RewardTracker():
 
     def __init__(self):
@@ -9,5 +7,5 @@ class Gen1RewardTracker():
     def total_reward(self):
         return self._total_reward
 
-    def update_reward(self, poke_red):
+    def get_reward(self, poke_gen1):
         raise NotImplementedError(f"update_reward not implemented for class {self.__class__.__name__}")

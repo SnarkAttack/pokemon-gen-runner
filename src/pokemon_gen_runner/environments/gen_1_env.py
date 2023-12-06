@@ -1,10 +1,11 @@
+import numpy as np
 import gymnasium as gym
-from gymnasium.spaces import Dict, Discrete, Box
-from gymnasium.wrappers import FlattenObservation
-import pyboy.plugins.game_wrapper_pokemon_gen1 as poke_gen_1
-from pyboy import PyBoy, WindowEvent
+from gymnasium.spaces import Discrete
+from pyboy import PyBoy
+from gymnasium.spaces import Box, Dict
 from ..action import ALL_VALID_ACTIONS
 from ..reward_trackers import TouchGrassRewardTracker, BattleRewardTracker, ExplorerRewardTracker
+from ..observation_manager import ScreenOnlyObservationManager
 
 class PokemonGen1Env(gym.Env):
     def __init__(self, config={}):
@@ -18,14 +19,6 @@ class PokemonGen1Env(gym.Env):
         self._debug = config.get("debug", False)
         self._seed = config.get('seed', None)
 
-        # 8 options: up, down, left, right, A, B, Start, Select
-        self.action_space = Discrete(len(ALL_VALID_ACTIONS))
-        self.observation_space = Dict(
-            {
-                "map": Box(low=0, high=0x180, shape=(9, 10))
-            }
-        )
-
         head = 'headless' if config.get('headless', False) else 'SDL2'
         
         self._pyboy = PyBoy(
@@ -37,8 +30,14 @@ class PokemonGen1Env(gym.Env):
         self._poke_red = self._pyboy.game_wrapper()
         self._poke_red.start_game()
 
+        self._observation_manager = ScreenOnlyObservationManager()
+
         self._steps = 0
         self._reward_tracker = self._get_new_reward_tracker()
+
+        # 8 options: up, down, left, right, A, B, Start, Select
+        self.action_space = Discrete(len(ALL_VALID_ACTIONS))
+        self.observation_space = self._observation_manager.observation_space
 
         with open(self._init_state, 'rb') as f:
             self._pyboy.load_state(f)
@@ -50,13 +49,13 @@ class PokemonGen1Env(gym.Env):
 
     def _get_new_reward_tracker(self):
         if self._reward_tracker_type == 'touch_grass':
-            return TouchGrassRewardTracker(self._poke_red)
+            return TouchGrassRewardTracker()
         elif self._reward_tracker_type == 'battle':
-            return BattleRewardTracker(self._poke_red)
+            return BattleRewardTracker()
         elif self._reward_tracker_type == 'explore':
-            return ExplorerRewardTracker(self._poke_red)
+            return ExplorerRewardTracker()
         else:
-            raise ValueError(f"{self._reward_tracker_type} is not al valid rewatd tracker id")
+            raise ValueError(f"{self._reward_tracker_type} is not a valid reward tracker id")
 
     def _check_if_finished(self):
         return self._steps >= self._max_steps
@@ -67,37 +66,36 @@ class PokemonGen1Env(gym.Env):
     def step(self, action):
 
         action = ALL_VALID_ACTIONS[action]
-        # print(f"Steps: {self._steps}, action: {action.name}")
+
         action.perform_action(self._pyboy)
 
-        new_map = self._poke_red._get_screen_background_tilemap()[::2, ::2]
-
-        reward = self._reward_tracker.update_reward(self._poke_red)
+        reward = self._reward_tracker.get_reward(self._poke_red)
 
         self._steps += 1
 
         terminated = self._check_if_finished()
 
-        return {'map': new_map}, reward, False, terminated, {'reward_tracker': self._reward_tracker}
+        observation = self._observation_manager.current_observation(self._poke_red)
+
+        return observation, reward, False, terminated, {'reward_tracker': self._reward_tracker}
 
     def reset(self, seed=None):
 
         prev_reward_tracker = self._reward_tracker
-
-        total_reward = self._reward_tracker._total_reward
 
         with open(self._init_state, 'rb') as f:
             self._pyboy.load_state(f)
 
         self._steps = 0
         self._reward_tracker = self._get_new_reward_tracker()
+        
+        observation = self._observation_manager.current_observation(self._poke_red)
 
-        start_map = self._poke_red._get_screen_background_tilemap()[::2, ::2]
-
-        return {'map': start_map}, {'reward_tracker': prev_reward_tracker}
+        return observation, {'reward_tracker': prev_reward_tracker}
 
     def render(self):
-        return None
+        game_pixels_render = self.screen.screen_ndarray() # (144, 160, 3)
+        return game_pixels_render
 
     def close(self):
         pass

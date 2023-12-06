@@ -5,7 +5,7 @@ class BattleRewardTracker(Gen1RewardTracker):
     def __init__(self, poke_red):
         super().__init__()
 
-    def update_reward(self, poke_red):
+    def get_reward(self, poke_red):
 
         reward = 0
 
