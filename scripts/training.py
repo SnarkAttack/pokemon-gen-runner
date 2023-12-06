@@ -85,7 +85,7 @@ def train(args):
         env = SubprocVecEnv([make_env(i, env_config) for i in range(num_cpus)])
 
     session_id = str(uuid.uuid4())[:8]
-    session_dir = f"{reward_tracker_type}_{session_id}"
+    session_id = f"{reward_tracker_type}_{session_id}"
 
     tensorboard_path = Path(f"tensorboard")
     session_path = Path(f"output/{session_dir}")
@@ -124,7 +124,7 @@ def train(args):
         
     tensorboard_callback = TensorboardCallback()
 
-    print(f"Session dir is {session_dir}")
+    print(f"Session id is {session_id}")
 
     model.learn(total_timesteps=max_steps*num_cpus*num_epochs,
                 callback=[tensorboard_callback, checkpoint_callback],
