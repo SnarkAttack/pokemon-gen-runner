@@ -13,7 +13,7 @@ class StackedScreenObservationManager(ObservationManager):
             'screen_history': Box(low=0, high=255, shape=self._output_screen_shape, dtype=np.uint8)
         })
 
-        self._screen_history = np.zeros(((self._num_screens) + self._output_screen_shape))
+        self._screen_history = np.zeros(((self._num_screens,) + self._output_screen_shape))
 
     def current_observation(self, poke_gen1):
 
